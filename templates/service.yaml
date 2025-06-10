@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: {{ include "k8s-testApplicationA.fullname" . | lower | replace " " "-" }}
+  labels:
+    {{- include "k8s-testApplicationA.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.ports.publicPort }}
+      targetPort: 8080
+      protocol: TCP
+      name: public-port
+  selector:
+    {{- include "k8s-testApplicationA.selectorLabels" . | nindent 4 }}
