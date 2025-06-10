@@ -1,0 +1,52 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+- repo: https://github.com/crate-ci/typos
+  rev: v1.28.4
+  hooks:
+  - id: typos
+- repo: https://github.com/codespell-project/codespell
+  rev: v2.2.4
+  hooks:
+  - id: codespell
+- repo: https://github.com/thlorenz/doctoc
+  rev: v2.2.0
+  hooks:
+  - id: doctoc
+    files: ^README.md$
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v5.0.0
+  hooks:
+  - id: trailing-whitespace
+  - id: end-of-file-fixer
+    exclude: |
+      (?x)^(
+        README.md
+      )$
+  - id: mixed-line-ending
+  - id: check-yaml
+    args:
+    - --allow-multiple-documents
+    exclude: ^templates/
+  - id: check-added-large-files
+  - id: check-executables-have-shebangs
+  - id: check-shebang-scripts-are-executable
+  - id: check-merge-conflict
+  - id: no-commit-to-branch
+- repo: https://github.com/rhysd/actionlint
+  rev: v1.7.5
+  hooks:
+  - id: actionlint-system
+- repo: local
+  hooks:
+  - id: gitleaks
+    name: Run Gitleaks
+    language: system
+    entry: gitleaks dir --verbose
+    require_serial: true
+- repo: https://github.com/commitizen-tools/commitizen
+  rev: v4.1.0
+  hooks:
+  - id: commitizen
+  - id: commitizen-branch
+    stages: [pre-push]

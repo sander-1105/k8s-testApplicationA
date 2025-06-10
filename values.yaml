@@ -1,0 +1,11 @@
+imageName: gmicloud/cluster-engine/billing
+imageTag: 1.91.0
+
+fullnameOverride: "k8s-testapplication-a"
+
+service:
+  type: ClusterIP
+  ports:
+    publicPort: 8080
+
+global:

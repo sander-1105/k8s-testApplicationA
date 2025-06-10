@@ -1,0 +1,85 @@
+version: '3'
+output: prefixed
+vars:
+  CHART_NAME:
+    sh: grep '^name:' Chart.yaml | sed 's/^name:[[:space:]]*//'
+  VERSION:
+    sh: grep '^version:' Chart.yaml | sed 's/^version:[[:space:]]*//'
+
+tasks:
+  default:
+    desc: Build and run service locally
+    cmds:
+      - task: ci:lint
+      - task: ci:test
+      - task: local:run
+
+  ci:default:
+    desc: Run all CI tasks
+    cmds:
+      - task: ci:lint
+      - task: ci:test
+
+  ci:lint:
+    desc: Run linting as part of CI pipeline
+    cmds:
+      - task: helm:lint
+
+  ci:test:
+    desc: Run tests as part of CI pipeline
+    cmds:
+      - task: helm:test
+
+  release:
+    desc: Package project for release
+    cmds:
+      - task: helm:package
+
+  local:run:
+    desc: Run service locally
+    cmds:
+      - task: helm:deploy
+
+  cleanup:
+    desc: Remove build artifacts and uninstall Helm chart
+    cmds:
+      - rm -rf target
+      - task: helm:uninstall
+
+  helm:lint:
+    desc: Validate Helm chart structure and configuration
+    silent: true
+    cmds:
+      - echo "Running Helm lint validation for chart {{.CHART_NAME}}..."
+      - helm lint . --with-subcharts --strict
+
+  helm:package:
+    desc: Package Helm chart directory into a chart archive
+    silent: true
+    cmds:
+      - echo "Packaging Helm chart {{.CHART_NAME}}:{{.VERSION}} into target directory..."
+      - helm package ./ -u -d target
+      - echo "Chart package created at target/{{.CHART_NAME}}-{{.VERSION}}.tgz"
+
+  helm:test:
+    desc: Run Helm chart tests
+    silent: true
+    cmds:
+      - echo "Running Helm tests for {{.CHART_NAME}}..."
+      - echo "TODO CE-22 Deployment test on CI builds"
+
+  helm:deploy:
+    desc: Install or upgrade Helm chart in local Kubernetes cluster
+    silent: false
+    cmds:
+      - echo "Deploying {{.CHART_NAME}} chart to local cluster..."
+      - helm upgrade --install {{.CHART_NAME}} ./
+      - echo "Chart {{.CHART_NAME}} has been deployed/upgraded successfully"
+
+  helm:uninstall:
+    desc: Remove Helm chart from local Kubernetes cluster
+    silent: true
+    cmds:
+      - echo "Uninstalling chart {{.CHART_NAME}} from local cluster..."
+      - helm uninstall {{.CHART_NAME}} --ignore-not-found
+      - echo "Chart {{.CHART_NAME}} has been successfully uninstalled"
