@@ -61,5 +61,6 @@ jobs:
         run: |
           CHART_NAME=$(task helm:get-name)
           CHART_VERSION=$(task helm:get-version)
+          
           # Push chart
           # helm push "target/${CHART_NAME}-${CHART_VERSION}.tgz" "oci://${{ env.REGISTRY }}/${{ github.repository_owner }}"
