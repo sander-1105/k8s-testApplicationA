@@ -67,14 +67,29 @@ jobs:
 
 
   tags:
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Task
+        uses: arduino/setup-task@v2
+        with:
+          version: 3.x
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          
       - name: Change Version
         run: |
+          # Add task to PATH
+          export PATH="$HOME/.local/bin:$PATH"
+          
           # Get current version from Chart.yaml
           CURRENT_VERSION=$(task helm:get-version)
           
