@@ -101,6 +101,7 @@ jobs:
           chmod +x /usr/local/bin/yq
 
       - name: Update local version
+        id: version_update
         run: |
           # Get current version using yq
           CURRENT_VERSION=$(yq '.version' Chart.yaml)
@@ -119,6 +120,9 @@ jobs:
           # Increment minor version
           NEW_MINOR=$((MINOR + 1))
           NEW_VERSION="${MAJOR}.${NEW_MINOR}.${PATCH}"
+          
+          # Save new version as output
+          echo "new_version=${NEW_VERSION}" >> $GITHUB_OUTPUT
           
           # Update version in Chart.yaml using yq
           yq -i ".version = \"${NEW_VERSION}\"" Chart.yaml
@@ -139,50 +143,22 @@ jobs:
             echo "Error: Failed to push version update"
             exit 1
           fi
-
-      # - name: Update Remote Versions
-      #   run: |
-      #     # Get remote URLs from ci.yml
-      #     REMOTE_URLS=$(yq '.server-helm-chart-ssh-url' .github/workflows/ci.yml)
           
-      #     # Get current version
-      #     CURRENT_VERSION=$(yq '.version' Chart.yaml)
           
-      #     # Push to all remote repositories
-      #     IFS=',' read -ra REPO_URLS <<< "${REMOTE_URLS}"
-      #     for REPO_URL in "${REPO_URLS[@]}"; do
-      #       echo "Pushing to repository: $REPO_URL"
-      #       git remote set-url origin "$REPO_URL"
-      #       git add Chart.yaml
-      #       git commit -m "chore: bump version to ${NEW_VERSION}"
-      #       git push
-      #     done
 
       - name: Tag
         run: |
-          # Get the new version using yq
-          NEW_VERSION=$(yq '.version' Chart.yaml)
+          # Get the new version from previous step
+          NEW_VERSION=${{ steps.version_update.outputs.new_version }}
           if [ -z "$NEW_VERSION" ]; then
-            echo "Error: Could not get new version from Chart.yaml"
+            echo "Error: Could not get new version from previous step"
             exit 1
           fi
-          
-          # Get remote URLs from ci.yml
-          REMOTE_URLS=$(yq '.server-helm-chart-ssh-url' .github/workflows/ci.yml)
-          if [ -z "$REMOTE_URLS" ]; then
-            echo "Error: Could not get remote URLs from ci.yml"
+
+          # Create and push tag for current repository
+          git tag -a "v${NEW_VERSION}" -m "Release v${NEW_VERSION}"
+          git push origin "v${NEW_VERSION}"
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to push tag"
             exit 1
           fi
-          
-          # Create and push tag to all repositories
-          IFS=',' read -ra REPO_URLS <<< "${REMOTE_URLS}"
-          for REPO_URL in "${REPO_URLS[@]}"; do
-            echo "Creating tag in repository: $REPO_URL"
-            git remote set-url origin "$REPO_URL"
-            git tag -a "v${NEW_VERSION}" -m "Release v${NEW_VERSION}"
-            git push origin "v${NEW_VERSION}"
-            if [ $? -ne 0 ]; then
-              echo "Error: Failed to push tag to $REPO_URL"
-              exit 1
-            fi
-          done
