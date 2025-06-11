@@ -1,5 +1,6 @@
 version: '3'
 output: prefixed
+
 vars:
   CHART_NAME:
     sh: grep '^name:' Chart.yaml | sed 's/^name:[[:space:]]*//'
@@ -46,6 +47,24 @@ tasks:
       - rm -rf target
       - task: helm:uninstall
 
+  helm:get-name:
+    desc: Get chart name for GitHub Actions
+    silent: true
+    cmds:
+      - echo "{{.CHART_NAME}}"
+
+  helm:get-version:
+    desc: Get chart version for GitHub Actions
+    silent: true
+    cmds:
+      - echo "{{.VERSION}}"
+
+  helm:info:
+    desc: Display chart information
+    cmds:
+      - echo "Chart Name - {{.CHART_NAME}}"
+      - echo "Chart Version - {{.VERSION}}"
+
   helm:lint:
     desc: Validate Helm chart structure and configuration
     silent: true
@@ -57,7 +76,8 @@ tasks:
     desc: Package Helm chart directory into a chart archive
     silent: true
     cmds:
-      - echo "Packaging Helm chart {{.CHART_NAME}}:{{.VERSION}} into target directory..."
+      - echo "Packaging Helm chart {{.CHART_NAME}} version {{.VERSION}} into target directory..."
+      - mkdir -p target
       - helm package ./ -u -d target
       - echo "Chart package created at target/{{.CHART_NAME}}-{{.VERSION}}.tgz"
 
