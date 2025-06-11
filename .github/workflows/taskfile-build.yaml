@@ -10,14 +10,14 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  
+
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-      
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -61,7 +61,7 @@ jobs:
         run: |
           CHART_NAME=$(task helm:get-name)
           CHART_VERSION=$(task helm:get-version)
-          helm push target/${CHART_NAME}-${CHART_VERSION}.tgz oci://${{ env.REGISTRY }}/${{ github.repository_owner }}
+          helm push "target/${CHART_NAME}-${CHART_VERSION}.tgz" "oci://${{ env.REGISTRY }}/${{ github.repository_owner }}"
 
   release:
     needs: build
@@ -69,7 +69,7 @@ jobs:
     if: github.event_name == 'release'
     permissions:
       contents: write
-      
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -83,4 +83,4 @@ jobs:
       - name: Attach chart to release
         uses: softprops/action-gh-release@v2.3.2
         with:
-          files: ./artifacts/*.tgz 
+          files: ./artifacts/*.tgz

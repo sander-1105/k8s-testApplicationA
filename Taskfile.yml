@@ -102,4 +102,4 @@ tasks:
     cmds:
       - echo "Uninstalling chart {{.CHART_NAME}} from local cluster..."
       - helm uninstall {{.CHART_NAME}} --ignore-not-found
-      - echo "Chart {{.CHART_NAME}} has been successfully uninstalled" 
+      - echo "Chart {{.CHART_NAME}} has been successfully uninstalled"
