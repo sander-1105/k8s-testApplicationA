@@ -61,26 +61,5 @@ jobs:
         run: |
           CHART_NAME=$(task helm:get-name)
           CHART_VERSION=$(task helm:get-version)
-          helm push "target/${CHART_NAME}-${CHART_VERSION}.tgz" "oci://${{ env.REGISTRY }}/${{ github.repository_owner }}"
-
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.event_name == 'release'
-    permissions:
-      contents: write
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Download chart artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: helm-chart-${{ github.sha }}
-          path: ./artifacts
-
-      - name: Attach chart to release
-        uses: softprops/action-gh-release@v2.3.2
-        with:
-          files: ./artifacts/*.tgz
+          # Push chart
+          # helm push "target/${CHART_NAME}-${CHART_VERSION}.tgz" "oci://${{ env.REGISTRY }}/${{ github.repository_owner }}"
