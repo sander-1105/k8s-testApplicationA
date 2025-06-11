@@ -21,6 +21,12 @@
 .idea/
 *.tmproj
 .vscode/
-# CI dirs
-target/
-.local/
+# devbox
+.devbox/
+# Task and CI files
+Taskfile.yml
+Taskfile.yml.backup
+.github/
+# Other
+*.md
+.gitattributes

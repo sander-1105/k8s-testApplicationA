@@ -1,0 +1,4 @@
+# Use commas to separate multiple server charts.
+# Example:
+# server-helm-chart-ssh-url: "git@gitlab.com:product-center/testgroup/test-server1.git,git@gitlab.com:product-center/testgroup/test-server2.git"
+server-helm-chart-ssh-url: ""
