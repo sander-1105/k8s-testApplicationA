@@ -12,7 +12,7 @@ env:
   REGISTRY: ghcr.io
 
 jobs:
-  build:
+  BuildHelmPackage:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -68,7 +68,7 @@ jobs:
 
 
   UpdateVersionAndtags:
-    needs: build
+    needs: BuildHelmPackage
     runs-on: ubuntu-latest
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.base_ref == 'main')
     permissions:
