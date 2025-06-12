@@ -107,6 +107,13 @@ jobs:
 
       - name: Update version and tag
         run: |
+          # Check if the last commit was a version update
+          LAST_COMMIT_MSG=$(git log -1 --pretty=%B)
+          if [[ "$LAST_COMMIT_MSG" == "chore: bump local version to"* ]]; then
+            echo "Version update was already executed, skipping"
+            exit 0
+          fi
+          
           # Get current version using yq
           CURRENT_VERSION=$(yq '.version' Chart.yaml)
           if [ -z "$CURRENT_VERSION" ]; then
@@ -146,7 +153,7 @@ jobs:
             exit 1
           fi
           
-          # Commit local version change
+          # Commit local current version change
           git add Chart.yaml
           git commit -m "chore: bump local version to ${NEW_VERSION}"
           git push origin main
