@@ -70,6 +70,7 @@ jobs:
   UpdateVersionAndtags:
     needs: build
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.base_ref == 'main')
     permissions:
       contents: write
       packages: write
@@ -138,10 +139,17 @@ jobs:
           # Configure git to use SSH
           git remote set-url origin git@github.com:${GITHUB_REPOSITORY}.git
           
+          # Pull latest changes
+          git pull origin main
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to pull latest changes"
+            exit 1
+          fi
+          
           # Commit local version change
           git add Chart.yaml
           git commit -m "chore: bump local version to ${NEW_VERSION}"
-          git push
+          git push origin main
           if [ $? -ne 0 ]; then
             echo "Error: Failed to push version update"
             exit 1
