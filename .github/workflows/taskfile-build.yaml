@@ -2,7 +2,7 @@ name: Taskfile Chart Build and Package
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
   release:
@@ -22,6 +22,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
 
       - name: Set up Helm
@@ -70,13 +71,14 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
 
       - name: Install Task
@@ -84,39 +86,71 @@ jobs:
         with:
           version: 3.x
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Change Version
+
+      - name: Setup SSH
         run: |
-          # Add task to PATH
-          export PATH="$HOME/.local/bin:$PATH"
-          
-          # Get current version from Chart.yaml
-          CURRENT_VERSION=$(task helm:get-version)
+          if [ -z "${{ secrets.SSH_PRIVATE_KEY }}" ]; then
+            echo "Error: SSH_PRIVATE_KEY secret not found"
+            exit 1
+          fi
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          chmod 700 ~/.ssh
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+      - name: Install yq
+        run: |
+          wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          chmod +x /usr/local/bin/yq
+
+      - name: Update version and tag
+        run: |
+          # Get current version using yq
+          CURRENT_VERSION=$(yq '.version' Chart.yaml)
+          if [ -z "$CURRENT_VERSION" ]; then
+            echo "Error: Could not get current version from Chart.yaml"
+            exit 1
+          fi
           
           # Extract major, minor, and patch versions
           IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+          if [ -z "$MAJOR" ] || [ -z "$MINOR" ] || [ -z "$PATCH" ]; then
+            echo "Error: Invalid version format in Chart.yaml"
+            exit 1
+          fi
           
-          # Increment patch version
-          NEW_PATCH=$((PATCH + 1))
-          NEW_VERSION="${MAJOR}.${MINOR}.${NEW_PATCH}"
+          # Increment minor version
+          NEW_MINOR=$((MINOR + 1))
+          NEW_VERSION="${MAJOR}.${NEW_MINOR}.${PATCH}"
           
-          # Update version in Chart.yaml
-          sed -i "s/^version:.*/version: ${NEW_VERSION}/" Chart.yaml
+          # Update version in Chart.yaml using yq
+          yq -i ".version = \"${NEW_VERSION}\"" Chart.yaml
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to update version in Chart.yaml"
+            exit 1
+          fi
           
           # Create git config
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           
-          # Commit and push changes
+          # Configure git to use SSH
+          git remote set-url origin git@github.com:${GITHUB_REPOSITORY}.git
+          
+          # Commit local version change
           git add Chart.yaml
-          git commit -m "chore: bump version to ${NEW_VERSION}"
+          git commit -m "chore: bump local version to ${NEW_VERSION}"
           git push
-
-      - name: Tag
-        run: |
-          # Get the new version
-          NEW_VERSION=$(task helm:get-version)
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to push version update"
+            exit 1
+          fi
           
           # Create and push tag
           git tag -a "v${NEW_VERSION}" -m "Release v${NEW_VERSION}"
           git push origin "v${NEW_VERSION}"
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to push tag"
+            exit 1
+          fi
