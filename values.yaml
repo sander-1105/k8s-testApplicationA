@@ -1,5 +1,5 @@
 imageName: gmicloud/cluster-engine/billing
-imageTag: 0.44.0
+imageTag: 0.45.0
 fullnameOverride: k8s-testapplication-a
 service:
   type: ClusterIP
