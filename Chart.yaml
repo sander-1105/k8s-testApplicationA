@@ -4,6 +4,6 @@ description: |
   Deploy the k8s-testApplicationA service using Helm.
 type: application
 version: 0.26.0
-appVersion: 0.43.0
+appVersion: 0.44.0
 icon: https://inference-engine.gmicloud.ai/favicon.ico
 dependencies: []
