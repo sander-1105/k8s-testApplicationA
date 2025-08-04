@@ -1,8 +1,9 @@
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+   ![Helm Chart](https://img.shields.io/github/v/release/57block/k8s-testApplicationA?label=Helm%20Chart&color=blue)
 
-- [![k8s-testApplicationA](https://img.shields.io/github/v/tag/57block/k8s-testApplicationA?label=Helm%20Chart&color=blue)](https://github.com/57block/k8s-testApplicationA/releases)
+- [![k8s-testApplicationA](https://img.shields.io/github/v/tag/sander-1105/k8s-testApplicationA?label=Helm%20Chart&color=blue)](https://github.com/57block/k8s-testApplicationA/releases)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
