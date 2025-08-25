@@ -8,18 +8,18 @@ on:
   release:
     types: [ published ]
   workflow_dispatch:
-    inputs:
-      version:
-        description: "Chart Version (e.g. 0.11.0)"
-        required: true
-      action:
-        description: "Choose push or pull"
-        required: true
-        default: "push"
-        type: choice
-        options:
-          - push
-          - pull
+#    inputs:
+#      version:
+#        description: "Chart Version (e.g. 0.11.0)"
+#        required: true
+#      action:
+#        description: "Choose push or pull"
+#        required: true
+#        default: "push"
+#        type: choice
+#        options:
+#          - push
+#          - pull
 
 env:
   REGISTRY: ghcr.io
